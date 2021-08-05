@@ -1,0 +1,27 @@
+{
+  "name": "Filtering - DevExtreme Data Grid",
+  "description": "This example demonstrates the DataGrid’s built-in filtering and searching capabilities. The filter row, located under the column headers, allows a user to type any value and select filter operations. With the header filter, which is called by clicking the filter icon in any column header, a user can choose from a set of predefined values. The search panel at the top of the DataGrid allows searching for values in all columns at once.\n",
+  "dependencies": {
+    "rrule": "2.6.6",
+    "react-dom": "17.0.2",
+    "react": "17.0.2",
+    "prop-types": "15.7.2",
+    "luxon": "1.27.0",
+    "jszip": "3.6.0",
+    "inferno-hydrate": "7.4.8",
+    "inferno-extras": "7.4.8",
+    "inferno-dom": "1.0.7",
+    "inferno-create-element": "7.4.8",
+    "inferno-create-class": "7.4.8",
+    "inferno-compat": "7.4.8",
+    "inferno-clone-vnode": "7.4.8",
+    "inferno": "7.4.8",
+    "es6-object-assign": "1.1.0",
+    "devextreme-react": "21.1.4",
+    "devextreme-quill": "1.1.4",
+    "devextreme": "21.1.4",
+    "devexpress-gantt": "2.1.42",
+    "devexpress-diagram": "2.1.19",
+    "@devextreme/vdom": "1.2.2"
+  }
+}
