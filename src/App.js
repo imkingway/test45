@@ -68,8 +68,8 @@ class App extends React.Component {
     this.onShowFilterRowChanged = this.onShowFilterRowChanged.bind(this);
     this.onShowHeaderFilterChanged = this.onShowHeaderFilterChanged.bind(this);
     this.onCurrentFilterChanged = this.onCurrentFilterChanged.bind(this);
-    this.myCellTemplate = this.myCellTemplate.bind(this);
     this.optionsChanged = this.optionsChanged.bind(this);
+    this.cellRender = this.cellRender.bind(this);
   }
   render() {
     return (
@@ -119,13 +119,13 @@ class App extends React.Component {
           <Column
             dataField="Employee"
             calculateFilterExpression={this.calculateFilterExpression2}
-            cellRender={this.myCellTemplate}
+            cellRender={this.cellRender}
           />
           <Column
             dataField="CustomerStoreCity"
             caption="City"
             calculateFilterExpression={this.calculateFilterExpression2}
-            cellRender={this.myCellTemplate}
+            cellRender={this.cellRender}
           >
             <HeaderFilter allowSearch={true} />
           </Column>
@@ -169,12 +169,11 @@ class App extends React.Component {
     return column.defaultCalculateFilterExpression.apply(this, arguments);
   }
 
-  myCellTemplate(cellData) {
-    console.log(cellData);
-    const query = this.state.searchPanelText.trim();
-    if (query.length === 0) return cellData.value;
+  cellRender(cellData) {
+    const search = this.state.searchPanelText.trim();
+    if (search.length === 0) return cellData.value;
     const regExpText = "(".concat(
-      query
+      search
         .replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&")
         .split(" ")
         .join(")|(")
@@ -203,6 +202,17 @@ class App extends React.Component {
     );
   }
 
+  optionsChanged(options) {
+    if (
+      options.name === "searchPanel" &&
+      options.fullName === "searchPanel.text"
+    ) {
+      this.setState({
+        searchPanelText: options.value
+      });
+    }
+  }
+
   calculateFilterExpression2(filtervalue, selectedFilterOperations, target) {
     const getRowText = (row) => {
       return Object.values(row).join(" ");
@@ -219,17 +229,6 @@ class App extends React.Component {
     });
     result.pop();
     return result;
-  }
-
-  optionsChanged(options) {
-    if (
-      options.name === "searchPanel" &&
-      options.fullName === "searchPanel.text"
-    ) {
-      this.setState({
-        searchPanelText: options.value
-      });
-    }
   }
 
   orderHeaderFilter(data) {
