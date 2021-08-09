@@ -9,7 +9,6 @@ import SelectBox from "devextreme-react/select-box";
 import CheckBox from "devextreme-react/check-box";
 
 import service from "./data.js";
-import { string } from "prop-types";
 
 const saleAmountEditorOptions = { format: "currency", showClearButton: true };
 
@@ -62,7 +61,7 @@ class App extends React.Component {
       showFilterRow: true,
       showHeaderFilter: true,
       currentFilter: this.applyFilterTypes[0].key,
-      searchPanelText: ''
+      searchPanelText: ""
     };
     this.dataGrid = null;
     this.orderHeaderFilter = this.orderHeaderFilter.bind(this);
@@ -171,34 +170,37 @@ class App extends React.Component {
   }
 
   myCellTemplate(cellData) {
-    console.log(cellData)
+    console.log(cellData);
     const query = this.state.searchPanelText.trim();
     if (query.length === 0) return cellData.value;
-    const regExpText = "(".concat(query.replace(/[-[\]{}()*+?.,\\^$|#]/g, '\\$&').split(" ").join(")|(").concat(")"));
-    const regExp = new RegExp(regExpText, 'ig');
-    const matches = cellData.value.match(regExp) ? cellData.value.match(regExp).filter(el => el !== undefined) : [];
+    const regExpText = "(".concat(
+      query
+        .replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&")
+        .split(" ")
+        .join(")|(")
+        .concat(")")
+    );
+    const regExp = new RegExp(regExpText, "ig");
+    const matches = cellData.value.match(regExp)
+      ? cellData.value.match(regExp).filter((el) => el !== undefined)
+      : [];
     return (
       <div>
         {cellData.value
           .split(regExp)
-          .filter(el => el !== undefined && el != null)
+          .filter((el) => el !== undefined && el != null)
           .map((el, index) => {
             if (el === matches[0]) {
-              matches.shift()
-              return (<span key={index} className="dx-datagrid-search-text">{el}</span>)
-            }
-            else return el;
+              matches.shift();
+              return (
+                <span key={index} className="dx-datagrid-search-text">
+                  {el}
+                </span>
+              );
+            } else return el;
           })}
       </div>
     );
-  }
-
-  optionsChanged(options) {
-    if (options.name === 'searchPanel' && options.fullName === 'searchPanel.text') {
-      this.setState({
-        searchPanelText: options.value
-      });
-    }
   }
 
   calculateFilterExpression2(filtervalue, selectedFilterOperations, target) {
@@ -217,6 +219,17 @@ class App extends React.Component {
     });
     result.pop();
     return result;
+  }
+
+  optionsChanged(options) {
+    if (
+      options.name === "searchPanel" &&
+      options.fullName === "searchPanel.text"
+    ) {
+      this.setState({
+        searchPanelText: options.value
+      });
+    }
   }
 
   orderHeaderFilter(data) {
