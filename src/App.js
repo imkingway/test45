@@ -61,13 +61,16 @@ class App extends React.Component {
     this.state = {
       showFilterRow: true,
       showHeaderFilter: true,
-      currentFilter: this.applyFilterTypes[0].key
+      currentFilter: this.applyFilterTypes[0].key,
+      searchPanelText: ""
     };
     this.dataGrid = null;
     this.orderHeaderFilter = this.orderHeaderFilter.bind(this);
     this.onShowFilterRowChanged = this.onShowFilterRowChanged.bind(this);
     this.onShowHeaderFilterChanged = this.onShowHeaderFilterChanged.bind(this);
     this.onCurrentFilterChanged = this.onCurrentFilterChanged.bind(this);
+    this.myCellTemplate = this.myCellTemplate.bind(this);
+    this.optionsChanged = this.optionsChanged.bind(this);
   }
   render() {
     return (
@@ -75,6 +78,7 @@ class App extends React.Component {
         <DataGrid
           id="gridContainer"
           ref={(ref) => (this.dataGrid = ref)}
+          onOptionChanged={this.optionsChanged}
           dataSource={this.orders}
           keyExpr="ID"
           showBorders={true}
@@ -116,13 +120,13 @@ class App extends React.Component {
           <Column
             dataField="Employee"
             calculateFilterExpression={this.calculateFilterExpression2}
-            cellTemplate={this.myCellTemplate}
+            cellRender={this.myCellTemplate}
           />
           <Column
             dataField="CustomerStoreCity"
             caption="City"
             calculateFilterExpression={this.calculateFilterExpression2}
-            cellTemplate={this.myCellTemplate}
+            cellRender={this.myCellTemplate}
           >
             <HeaderFilter allowSearch={true} />
           </Column>
@@ -166,57 +170,40 @@ class App extends React.Component {
     return column.defaultCalculateFilterExpression.apply(this, arguments);
   }
 
-  myCellTemplate(cellElement, cellInfo) {
-    const text = cellInfo.text,
-      search = cellInfo.component.option("searchPanel.text");
-
-    console.log(text, "txt");
-    if (search.length) {
-      const filters = search.split(" ").filter((n) => n !== "");
-      console.log(filters, "filters");
-      const searchStrings = filters
-        .map((filter) => {
-          return [
-            text.toLowerCase().indexOf(filter.toLowerCase()),
-            filter.length
-          ];
-        })
-        .filter((str) => {
-          return str[0] >= 0;
-        })
-        .sort((str) => {
-          return str[0];
-        });
-      console.log(searchStrings, "searchStrings");
-      if (!searchStrings.length) {
-        cellElement.append(text);
-      } else {
-        const span = '<span class="dx-datagrid-search-text">';
-        const highlights = [];
-
-        searchStrings.forEach((str, index) => {
-          if (index === 0) {
-            highlights.push(text.slice(0, str[0]));
-          }
-
-          highlights.push(span);
-          highlights.push(text.slice(str[0], str[0] + str[1]));
-          highlights.push("</span>");
-
-          if (index === searchStrings.length - 1) {
-            highlights.push(text.slice(str[0] + str[1]));
-          } else {
-            highlights.push(text.slice(str[1], searchStrings[index + 1][0]));
-          }
-        });
-
-        var html = highlights.join("");
-        cellElement.innerHTML = html;
-      }
-    } else {
-      cellElement.append(text);
-    }
+  myCellTemplate(cellData) {
+    console.log(cellData);
+    const query = this.state.searchPanelText.trim();
+    if (query.length === 0) return cellData.value;
+    const regExpText = "(".concat(
+      query
+        .replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&")
+        .split(" ")
+        .join(")|(")
+        .concat(")")
+    );
+    const regExp = new RegExp(regExpText, "ig");
+    const matches = cellData.value.match(regExp)
+      ? cellData.value.match(regExp).filter((el) => el !== undefined)
+      : [];
+    return (
+      <div>
+        {cellData.value
+          .split(regExp)
+          .filter((el) => el !== undefined && el != null)
+          .map((el, index) => {
+            if (el === matches[0]) {
+              matches.shift();
+              return (
+                <span key={index} className="dx-datagrid-search-text">
+                  {el}
+                </span>
+              );
+            } else return el;
+          })}
+      </div>
+    );
   }
+
   calculateFilterExpression2(filtervalue, selectedFilterOperations, target) {
     const getRowText = (row) => {
       return Object.values(row).join(" ");
@@ -233,6 +220,17 @@ class App extends React.Component {
     });
     result.pop();
     return result;
+  }
+
+  optionsChanged(options) {
+    if (
+      options.name === "searchPanel" &&
+      options.fullName === "searchPanel.text"
+    ) {
+      this.setState({
+        searchPanelText: options.value
+      });
+    }
   }
 
   orderHeaderFilter(data) {
